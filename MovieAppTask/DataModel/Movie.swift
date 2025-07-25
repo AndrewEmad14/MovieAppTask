@@ -21,5 +21,5 @@ struct Movie : Codable{
     var release_date : String?
     var title : String?
     var vote_average : Double?
-    var favorite : Bool?
+  
 }

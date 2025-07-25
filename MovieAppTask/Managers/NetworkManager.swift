@@ -14,10 +14,10 @@ class NetworkManager{
     private var apiKey = ""
     private let session = URLSession.shared
     private init(){}
-    func fetchTopMovies()->AnyPublisher<[Movie], NetworkError>{
+    func fetchTopMovies(page : Int)->AnyPublisher<[Movie], NetworkError>{
         let baseUrl = "\(baseURL)/top_rated"
         setAPIKey()
-        guard let url = createMovieListUrl(baseURL: baseUrl)else{
+        guard let url = createMovieListUrl(baseURL: baseUrl,page:page)else{
             return Fail(error: NetworkError.invalidURL)
                 .eraseToAnyPublisher()
         }
@@ -67,11 +67,11 @@ class NetworkManager{
             
         }
     }
-    private func createMovieListUrl(baseURL : String) -> URL? {
+    private func createMovieListUrl(baseURL : String,page: Int) -> URL? {
             var components = URLComponents(string: "\(baseURL)")
             components?.queryItems = [
                 URLQueryItem(name: "language", value: "en-US"),
-                URLQueryItem(name: "page", value: "1")
+                URLQueryItem(name: "page", value: String(page))
             ]
             return components?.url
     }

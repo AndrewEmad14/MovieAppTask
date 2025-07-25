@@ -11,22 +11,36 @@ class TopMovieView: UIViewController, UITableViewDataSource, UITableViewDelegate
 
     private let viewModel = MoviesViewModel()
     private var cancellables = Set<AnyCancellable>()
-    
-
-  
     private let activityIndicator = UIActivityIndicatorView(style: .large)
     private let retryButton = UIButton(type: .system)
-    
+    private var currentPageNumber = 1
+    private var isFetching = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.delegate = self
         let nib = UINib(nibName: "TopMovieCustomCellView", bundle: nil)
         self.tableView.register(nib, forCellReuseIdentifier: "MovieCell")
+        // Trigger initial data load
+        loadMovie()
         bindViewModel()
-        viewModel.loadMovies() // Trigger initial data load
     }
-    
+    func loadMovie(){
+        do{
+            try viewModel.fetchMoviesFromCoreData(page: currentPageNumber)
+            isFetching = false
+            return
+        }catch{
+            print(error)
+            viewModel.fetchMoviesFromAPI(page: currentPageNumber)
+        }
+        
+      
+      //  CoreDataManager.shared.deleteAllMovies()
+     
+        
+        
+    }
     
  
     private func bindViewModel() {
@@ -50,6 +64,8 @@ class TopMovieView: UIViewController, UITableViewDataSource, UITableViewDelegate
                 } else {
                     self?.activityIndicator.stopAnimating()
                     self?.tableView.isHidden = false
+                    self?.isFetching = false
+                    
                 }
             }
             .store(in: &cancellables)
@@ -69,7 +85,7 @@ class TopMovieView: UIViewController, UITableViewDataSource, UITableViewDelegate
     
   
     @objc private func retryTapped() {
-        viewModel.retryLoading()
+      
     }
     
   
@@ -105,5 +121,16 @@ class TopMovieView: UIViewController, UITableViewDataSource, UITableViewDelegate
          view.movie = viewModel.movies[indexPath.row]
          view.viewModel = viewModel
         self.navigationController?.pushViewController(view, animated: true)
+    }
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let height = scrollView.frame.size.height
+        let contentYOffset = scrollView.contentOffset.y
+        let distanceFromBottom = scrollView.contentSize.height - contentYOffset
+
+        if distanceFromBottom < height*2 && !isFetching{
+            isFetching.toggle()
+            currentPageNumber+=1
+            loadMovie()
+        }
     }
 }
