@@ -228,6 +228,7 @@
 			packageReferences = (
 				B4A722682E3072C3009CACEF /* XCRemoteSwiftPackageReference "SDWebImage" */,
 				B4A722692E307767009CACEF /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				B494DC022E34B6A2000A7D30 /* XCRemoteSwiftPackageReference "Reachability" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B4A265F32E2E9D2100F48AFC /* Products */;
@@ -586,6 +587,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		B494DC022E34B6A2000A7D30 /* XCRemoteSwiftPackageReference "Reachability" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ashleymills/Reachability.swift";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		B4A722682E3072C3009CACEF /* XCRemoteSwiftPackageReference "SDWebImage" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SDWebImage/SDWebImage";

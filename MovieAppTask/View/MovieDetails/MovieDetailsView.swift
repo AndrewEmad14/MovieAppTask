@@ -14,13 +14,13 @@ class MovieDetailsView: UIViewController {
     private let languageLabel = UILabel()
     private let ratingLabel = UILabel()
     private let descriptionLabel = UILabel()
-    private let Favorite = UIButton(type: .system)
-   
+    private let favortieButton = UIButton(type: .system)
+    
     
  
     var movie: Movie?
     var viewModel: MoviesViewModel?
-    
+
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -80,12 +80,12 @@ class MovieDetailsView: UIViewController {
         contentView.addSubview(descriptionLabel)
         
      
-        Favorite.setImage(UIImage(systemName: "star"), for: .normal)
-        Favorite.tintColor = UIColor.yellow
+        updateFavoriteButtonUI()
+        favortieButton.tintColor = UIColor.systemYellow
         
-        Favorite.layer.cornerRadius = 20
-        Favorite.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(Favorite)
+        favortieButton.layer.cornerRadius = 20
+        favortieButton.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(favortieButton)
         
         
         
@@ -131,17 +131,17 @@ class MovieDetailsView: UIViewController {
             descriptionLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: 0),
             
           
-            Favorite.leadingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -50),
-            Favorite.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant:8),
-            Favorite.widthAnchor.constraint(equalToConstant: 40),
-            Favorite.heightAnchor.constraint(equalToConstant: 40),
+            favortieButton.leadingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -50),
+            favortieButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant:-20),
+            favortieButton.widthAnchor.constraint(equalToConstant: 40),
+            favortieButton.heightAnchor.constraint(equalToConstant: 40),
             
          
         ])
         
        
-        Favorite.addTarget(self, action: #selector(favoriteButtonTapped), for: .touchUpInside)
-      
+        favortieButton.addTarget(self, action: #selector(favoriteButtonTapped), for: .touchUpInside)
+        favortieButton.tag = movie?.id ?? 0
     }
     
    
@@ -159,9 +159,49 @@ class MovieDetailsView: UIViewController {
     }
     
 
-    @objc private func favoriteButtonTapped() {
-        navigationController?.popViewController(animated: true)
+    @objc func favoriteButtonTapped(_ sender: UIButton) {
+        let movieID = sender.tag
+        let isFavorite = viewModel?.isFavorite(movieID: movieID) ?? false
+        
+        let alert = UIAlertController(title: "Confirm Action",
+                                          message: "Are you sure you want to remove the movie from your favorites?",
+                                          preferredStyle: .alert)
+
+            // OK action
+        let okAction = UIAlertAction(title: "OK", style: .default) {[weak self] _ in
+            self?.viewModel?.deleteFavorite(movieID: movieID)
+            self?.updateFavoriteButtonUI()
+        }
+
+            // Cancel action
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
+                print("User tapped Cancel")
+              
+        }
+
+        alert.addAction(okAction)
+        alert.addAction(cancelAction)
+        
+        
+        
+        
+        
+        if isFavorite {
+            self.present(alert,animated: true, completion:nil)
+        } else {
+            viewModel?.saveFavorite(movieID: movieID)
+        }
+        
+        updateFavoriteButtonUI()
+     
     }
-    
+    private func updateFavoriteButtonUI() {
+           guard let movieID = movie?.id, let viewModel = viewModel else {
+               favortieButton.setImage(UIImage(systemName: "star"), for: .normal)
+               return
+           }
+           let isFavorite = viewModel.isFavorite(movieID: movieID)
+        favortieButton.setImage(UIImage(systemName: isFavorite ? "star.fill" : "star"), for: .normal)
+    }
  
 }

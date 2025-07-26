@@ -25,6 +25,11 @@ class TopMovieView: UIViewController, UITableViewDataSource, UITableViewDelegate
         loadMovie()
         bindViewModel()
     }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated) // Always call the superclass implementation
+        // Add your custom code here
+        tableView.reloadData() // Refresh the table view to update UI
+    }
     func loadMovie(){
         do{
             try viewModel.fetchMoviesFromCoreData(page: currentPageNumber)
@@ -33,7 +38,7 @@ class TopMovieView: UIViewController, UITableViewDataSource, UITableViewDelegate
         }catch{
             print(error)
             viewModel.fetchMoviesFromAPI(page: currentPageNumber)
-        }
+       }
         
       
       //  CoreDataManager.shared.deleteAllMovies()
@@ -84,9 +89,6 @@ class TopMovieView: UIViewController, UITableViewDataSource, UITableViewDelegate
     }
     
   
-    @objc private func retryTapped() {
-      
-    }
     
   
     private func showErrorAlert(message: String) {
@@ -106,14 +108,35 @@ class TopMovieView: UIViewController, UITableViewDataSource, UITableViewDelegate
         let cell = tableView.dequeueReusableCell(withIdentifier: "MovieCell", for: indexPath) as! TopMovieTableViewCell
         let movie = viewModel.movies[indexPath.row]
         let url = viewModel.getImageUrl(posterPath: movie.poster_path ?? "")
+        let isFavorite = viewModel.isFavorite(movieID: movie.id)
         cell.movieTitle.text = movie.title
         cell.movieRating.text = String(movie.vote_average ?? 0)
         cell.movieReleaseDate.text = movie.release_date
         cell.rowImage.sd_setImage(with: URL(string: url), placeholderImage: UIImage(named: "placeHolder"))
-        cell.favoriteButton.setImage(UIImage(systemName:  "star"), for: .normal)
+        
+        cell.favoriteButton.setImage(UIImage(systemName:isFavorite ? "star.fill" : "star"), for: .normal)
+        cell.favoriteButton.removeTarget(nil, action: nil, for: .touchUpInside)
+        cell.favoriteButton.addTarget(self, action: #selector(favoriteButtonTapped(_:)), for: .touchUpInside)
+        cell.favoriteButton.tag = movie.id
+        
+        
+        
         return cell
+        
     }
-    
+    @objc func favoriteButtonTapped(_ sender: UIButton) {
+        let movieID = sender.tag
+        let isFavorite = viewModel.isFavorite(movieID: movieID)
+        
+        if isFavorite {
+            viewModel.deleteFavorite(movieID: movieID)
+        } else {
+            viewModel.saveFavorite(movieID: movieID)
+        }
+        
+        print("movieId: \(movieID)")
+        tableView.reloadData()
+    }
   
      func tableView(_ tableView: UITableView, performPrimaryActionForRowAt indexPath: IndexPath) {
          let view = self.storyboard?.instantiateViewController(withIdentifier: "MovieDetailScreen") as! MovieDetailsView

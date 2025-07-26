@@ -65,5 +65,14 @@ class MoviesViewModel: ObservableObject {
     func getImageUrl(posterPath:String)->String{
         return NetworkManager.sharedInstance.getImageUrl(posterPath: posterPath)
     }
+    func saveFavorite(movieID:Int){
+        CoreDataManager.shared.saveFavoirte(moiveID: movieID)
+    }
+    func deleteFavorite(movieID:Int){
+        CoreDataManager.shared.deleteFavorte(movieID: movieID)
+    }
+    func isFavorite(movieID:Int)-> Bool{
+       return CoreDataManager.shared.isFavortie(movieID: movieID)
+    }
  
 }

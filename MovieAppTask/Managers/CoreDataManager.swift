@@ -46,6 +46,44 @@ class CoreDataManager {
         }
     }
     
+    func saveFavoirte(moiveID:Int){
+        let context = self.context
+        let favoriteDB = FavoriteDB(context: context)
+        favoriteDB.movieID = Int32(moiveID)
+        favoriteDB.favorite = true
+        do{
+            try context.save()
+        }catch{
+            print("Failed to save to favorites: \(error)")
+        }
+        
+    }
+    func isFavortie(movieID:Int)->Bool{
+        let request: NSFetchRequest<NSFetchRequestResult> = FavoriteDB.fetchRequest()
+        request.predicate = NSPredicate(format: "movieID == %d",movieID)
+        do{
+            let count = try context.count(for: request)
+            if count > 0 {
+                return true
+            } else {
+                return false
+            }
+        }catch{print("Failed to fetch : \(error)")}
+        return false
+    }
+    func deleteFavorte(movieID:Int){
+        let request: NSFetchRequest<NSFetchRequestResult> = FavoriteDB.fetchRequest()
+        request.predicate = NSPredicate(format: "movieID == %d",movieID)
+        let deleteRequest = NSBatchDeleteRequest(fetchRequest: request)
+        
+        do {
+            try context.execute(deleteRequest)
+            try context.save()
+        } catch {
+            print("Failed to delete movies: \(error)")
+        }
+    }
+    
     func fetchMovies(page: Int) throws -> [MovieDB] {
         let request: NSFetchRequest<MovieDB> = MovieDB.fetchRequest()
         request.predicate = NSPredicate(format: "pageNumber == %d", page)
